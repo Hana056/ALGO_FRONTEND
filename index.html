@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Route Optimization: Cairo → Aleppo</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+<h2 style="text-align:center;">
+  Route Optimization from Cairo to Aleppo (Mongol Invasion)
+</h2>
+
+<div class="canvas-container">
+  <canvas id="graphCanvas" width="900" height="520"></canvas>
+</div>
+  <p id="result" style="text-align:center; font-weight:bold;"></p>
+
+<div style="margin-top: 20px; text-align:center;">
+  <button onclick="runShortestPath()">Phase 1: Safest Route</button>
+  <button onclick="runCapacity()">Phase 2: Capacity Constraints</button>
+  <button onclick="runSSP()">Phase 3: Flow Paths (SSP)</button>
+</div>
+
+<script src="graph.js"></script>
+</body>
+</html>

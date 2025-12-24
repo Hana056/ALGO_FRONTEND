@@ -1,0 +1,77 @@
+/* Body with vintage parchment background */
+body {
+  margin: 0;
+  font-family: 'Garamond', 'Georgia', serif;
+  background-color: #fdf6e3; /* light parchment color */
+  color: #3e2f1c; /* dark brown text */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+}
+
+/* Canvas styling: subtle vintage border */
+.canvas-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+#graphCanvas {
+  border: 4px solid #8b6d5c; /* dark brown border */
+  background-color: #fff8e1; /* parchment-like canvas */
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+}
+
+/* Button container with spacing */
+div {
+  margin-top: 25px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Buttons styled as old parchment buttons */
+button {
+  background-color: #d2b48c; /* tan parchment color */
+  color: #3e2f1c; /* dark brown text */
+  border: 2px solid #8b6d5c;
+  padding: 20px 30px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-family: 'Garamond', serif;
+  text-shadow: 1px 1px 0px rgba(255,255,255,0.3);
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  background-color: #c9a66f; /* slightly darker */
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Different colors for each phase (vintage tones) */
+button:nth-child(1) {
+  background-color: #c9a66f; /* Shortest Path - muted gold */
+}
+button:nth-child(2) {
+  background-color: #a67b5b; /* Capacity - earthy brown */
+}
+button:nth-child(3) {
+  background-color: #8b5e3c; /* SSP - dark antique brown */
+}
+
+/* Optional: make canvas label text look classic */
+canvas {
+  font-family: 'Garamond', serif;
+  font-weight: bold;
+  color: #3e2f1c;
+}
