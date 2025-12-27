@@ -1,5 +1,6 @@
 const canvas = document.getElementById("graphCanvas");
 const ctx = canvas.getContext("2d");
+let backendData = null;
 
 // =======================
 // CONSTANTS
@@ -9,21 +10,102 @@ const NODE_RADIUS = 40;
 // =======================
 // DYNAMIC GRAPH DATA
 // =======================
+
+// VISUAL LAYOUT (Schematic View)
+// =======================
+
 let nodes = [
-  { id: "Cairo", x: 100, y: 100 },
-  { id: "Gaza", x: 320, y: 80 },
-  { id: "Damascus", x: 100, y: 340 },
-  { id: "Homs", x: 320, y: 340 },
-  { id: "Aleppo", x: 580, y: 220 }
-];
+  { id: "Cairo",     x: 60,  y: 260 },
+  { id: "Damietta",  x: 160, y: 80 }, 
+  { id: "Arish",     x: 160, y: 360 }, 
+  { id: "Acre",      x: 300, y: 100 }, 
+  { id: "Gaza",      x: 300, y: 460 }, 
+  { id: "Sidon",     x: 450, y: 10  }, 
+  { id: "Jerusalem", x: 450, y: 460 }, 
+  { id: "Tripoli",   x: 640, y: 10  }, 
+  { id: "Damascus",  x: 640, y: 300 }, 
+  { id: "Homs",      x: 780, y: 80  }, 
+  { id: "Hamah",     x: 780, y: 440 }, 
+  { id: "Aleppo",    x: 880, y: 260 }  
+]
 
 let edges = [
-  { from: "Cairo", to: "Gaza", weight: 5 },
-  { from: "Cairo", to: "Damascus", weight: 3 },
-  { from: "Gaza", to: "Homs", weight: 2 },
-  { from: "Damascus", to: "Homs", weight: 4 },
-  { from: "Homs", to: "Aleppo", weight: 1 }
+  // 0: Cairo -> Damietta, Arish, Acre
+  { from: "Cairo",     to: "Damietta",  weight: 2 },
+  { from: "Cairo",     to: "Arish",     weight: 6 },
+  { from: "Cairo",     to: "Acre",      weight: 9 },
+
+  // 1: Damietta -> Arish, Gaza, Acre
+  { from: "Damietta",  to: "Arish",     weight: 6 },
+  { from: "Damietta",  to: "Gaza",      weight: 7 },
+  { from: "Damietta",  to: "Acre",      weight: 9 },
+
+  // 2: Arish -> Gaza, Jerusalem, Acre, Damascus
+  { from: "Arish",     to: "Gaza",      weight: 2 },
+  { from: "Arish",     to: "Jerusalem", weight: 6 },
+  { from: "Arish",     to: "Acre",      weight: 7 },
+  { from: "Arish",     to: "Damascus",  weight: 10 },
+
+  // 3: Gaza -> Jerusalem, Acre
+  { from: "Gaza",      to: "Jerusalem", weight: 5 },
+  { from: "Gaza",      to: "Acre",      weight: 6 },
+
+  // 4: Jerusalem -> Acre, Sidon, Damascus, Aleppo
+  { from: "Jerusalem", to: "Acre",      weight: 3 },
+  { from: "Jerusalem", to: "Sidon",     weight: 7 },
+  { from: "Jerusalem", to: "Damascus",  weight: 6 },
+  { from: "Jerusalem", to: "Aleppo",    weight: 12 },
+
+  // 5: Acre -> Sidon, Tripoli, Damascus
+  { from: "Acre",      to: "Sidon",     weight: 3 },
+  { from: "Acre",      to: "Tripoli",   weight: 4 },
+  { from: "Acre",      to: "Damascus",  weight: 8 },
+
+  // 6: Sidon -> Tripoli, Homs, Damascus
+  { from: "Sidon",     to: "Tripoli",   weight: 2 },
+  { from: "Sidon",     to: "Homs",      weight: 6 },
+  { from: "Sidon",     to: "Damascus",  weight: 7 },
+
+  // 7: Tripoli -> Homs, Hamah, Aleppo
+  { from: "Tripoli",   to: "Homs",      weight: 4 },
+  { from: "Tripoli",   to: "Hamah",     weight: 5 },
+  { from: "Tripoli",   to: "Aleppo",    weight: 6 },
+
+  // 8: Homs -> Hamah, Damascus, Aleppo
+  { from: "Homs",      to: "Hamah",     weight: 2 },
+  { from: "Homs",      to: "Damascus",  weight: 4 },
+  { from: "Homs",      to: "Aleppo",    weight: 5 },
+
+  // 9: Hamah -> Damascus, Aleppo
+  { from: "Hamah",     to: "Damascus",  weight: 3 },
+  { from: "Hamah",     to: "Aleppo",    weight: 4 },
+
+  // 10: Damascus -> Homs, Hamah, Aleppo
+  { from: "Damascus",  to: "Homs",      weight: 4 },
+  { from: "Damascus",  to: "Hamah",     weight: 3 },
+  { from: "Damascus",  to: "Aleppo",    weight: 2 }
 ];
+
+// =======================
+// BACKEND NODE ID → UI NAME MAP
+// =======================
+const nodeMap = {
+  0: "Cairo",
+  1: "Damietta",
+  2: "Arish",
+  3: "Gaza",
+  4: "Jerusalem",
+  5: "Acre",
+  6: "Sidon",
+  7: "Tripoli",
+  8: "Homs",
+  9: "Hamah",
+  10: "Damascus",
+  11: "Aleppo"
+};
+function mapPath(path) {
+  return path.map(id => nodeMap[id]);
+}
 
 // =======================
 // UPDATE GRAPH DATA FUNCTION
@@ -190,61 +272,69 @@ function animatePath(path, color, callback = null, index = 0, drawnEdges = []) {
 // =======================
 const shortestPath = ["Cairo", "Damascus", "Homs", "Aleppo"];
 
-function runShortestPath(cost) {
-  animatePath(shortestPath, "green");
+function runDijkstraFromBackend() {
+  if (!backendData) return;
+
+  const path = mapPath(backendData.dijkstra.path);
+  const cost = backendData.dijkstra.cost;
+
+  drawGraph(); // reset canvas
+  animatePath(path, "green");
+
   document.getElementById("result").innerText =
-    `Shortest path cost from Cairo to Aleppo = ${cost}`;
+    `Shortest path cost = ${cost}`;
 }
+
 
 // =======================
 // PHASE 2: CAPACITY (DINIC)
 // =======================
-const capacityPaths = [
-  ["Cairo", "Gaza", "Homs", "Aleppo"],
-  ["Cairo", "Damascus", "Homs", "Aleppo"]
-];
+function runDinicFromBackend() {
+  if (!backendData) return;
 
-function runCapacity(maxFlow) {
+  const paths = backendData.dinic.paths.map(p => mapPath(p));
+  const maxFlow = backendData.dinic.max_flow;
+
+  drawGraph();
   document.getElementById("result").innerText =
-    `Maximum possible flow from Cairo to Aleppo = ${maxFlow} units`;
+    `Maximum flow = ${maxFlow}`;
 
   let i = 0;
-
-  function next() {
-    if (i >= capacityPaths.length) return;
-
-    animatePath(capacityPaths[i], "blue", () => {
+  function animateNext() {
+    if (i >= paths.length) return;
+    animatePath(paths[i], "blue", () => {
       i++;
-      next();
+      animateNext();
     });
   }
-
-  next();
+  animateNext();
 }
+
 
 // =======================
 // PHASE 3: SSP (FLOW DECOMPOSITION)
 // =======================
-const sspPaths = [
-  ["Cairo", "Damascus", "Homs", "Aleppo"],
-  ["Cairo", "Gaza", "Homs", "Aleppo"]
-];
+function runSSPFromBackend() {
+  if (!backendData) return;
 
-function runSSP(numPaths) {
+  const paths = backendData.mcmf.paths.map(p => mapPath(p.nodes));
+  const totalCost = backendData.mcmf.total_cost;
+
+  drawGraph();
   document.getElementById("result").innerText =
-    `Flow decomposed into ${numPaths} disjoint paths`;
+    `Total min cost = ${totalCost}`;
 
-  let step = 0;
+  let i = 0;
   function animateNext() {
-    if (step >= sspPaths.length) return;
-    animatePath(sspPaths[step], "red", () => {
-      step++;
+    if (i >= paths.length) return;
+    animatePath(paths[i], "red", () => {
+      i++;
       animateNext();
     });
   }
-
   animateNext();
 }
+
 
 // =======================
 // INITIAL DRAW
@@ -252,3 +342,10 @@ function runSSP(numPaths) {
 centerGraph();
 drawGraph();
 
+fetch("data.json")
+  .then(res => res.json())
+  .then(data => {
+    backendData = data;
+    console.log("Backend data loaded:", backendData);
+  })
+  .catch(err => console.error("Failed to load backend data", err));

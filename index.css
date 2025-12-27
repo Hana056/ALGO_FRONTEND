@@ -1,45 +1,79 @@
 /* Body with vintage parchment background */
 body {
   margin: 0;
+  height: 100vh;        /* Force body to be exactly screen height */
+  width: 100vw;         /* Force body to be exactly screen width */
+  overflow: hidden;     /* Disable scrollbars */
+  box-sizing: border-box; 
+  
   font-family: 'Garamond', 'Georgia', serif;
-  background-color: #fdf6e3; /* light parchment color */
-  color: #3e2f1c; /* dark brown text */
+  background-color: #fdf6e3; 
+  color: #3e2f1c; 
+  
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 30px;
+  justify-content: center; /* Center content vertically */
+  padding: 10px; /* Reduced padding for mobile safety */
 }
 
-/* Canvas styling: subtle vintage border */
+/* Heading */
+h2 {
+  margin: 10px 0;
+  text-align: center;
+  font-size: 24px; /* Default size */
+}
+
+/* Canvas styling */
 .canvas-container {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  max-width: 900px; /* Stop it from getting too big on Desktop */
+  
+  /* Crucial for Mobile: Allow container to shrink */
+  flex-shrink: 1; 
+  min-height: 0; 
 }
-
 
 #graphCanvas {
-  border: 4px solid #8b6d5c; /* dark brown border */
-  background-color: #fff8e1; /* parchment-like canvas */
+  border: 4px solid #8b6d5c;
+  background-color: #fff8e1;
   border-radius: 12px;
   box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+
+  /* RESPONSIVE MAGIC */
+  width: 100%;          /* Fill the container width */
+  height: auto;         /* Scale height automatically to match aspect ratio */
+  aspect-ratio: 900/520; /* Keep the map shape correct */
+  object-fit: contain;  /* Ensure the map is never cropped */
 }
 
-/* Button container with spacing */
-div {
-  margin-top: 25px;
+/* Result text */
+#result {
+  text-align: center; 
+  font-weight: bold;
+  margin: 10px 0;
+  font-size: 18px;
+  min-height: 24px; /* Reserve space so layout doesn't jump */
+}
+
+/* Button container */
+.button-container {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
   justify-content: center;
+  margin-bottom: 10px;
 }
 
-/* Buttons styled as old parchment buttons */
+/* Buttons */
 button {
-  background-color: #d2b48c; /* tan parchment color */
-  color: #3e2f1c; /* dark brown text */
+  background-color: #d2b48c;
+  color: #3e2f1c;
   border: 2px solid #8b6d5c;
-  padding: 20px 30px;
+  padding: 15px 30px; /* Slightly smaller default padding */
   font-size: 16px;
   cursor: pointer;
   border-radius: 6px;
@@ -49,7 +83,7 @@ button {
 }
 
 button:hover {
-  background-color: #c9a66f; /* slightly darker */
+  background-color: #c9a66f;
   transform: translateY(-2px);
   box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 }
@@ -58,20 +92,29 @@ button:active {
   transform: translateY(0);
 }
 
-/* Different colors for each phase (vintage tones) */
-button:nth-child(1) {
-  background-color: #c9a66f; /* Shortest Path - muted gold */
-}
-button:nth-child(2) {
-  background-color: #a67b5b; /* Capacity - earthy brown */
-}
-button:nth-child(3) {
-  background-color: #8b5e3c; /* SSP - dark antique brown */
-}
+/* Button Phase Colors */
+button:nth-child(1) { background-color: #c9a66f; }
+button:nth-child(2) { background-color: #a67b5b; }
+button:nth-child(3) { background-color: #8b5e3c; }
 
-/* Optional: make canvas label text look classic */
-canvas {
-  font-family: 'Garamond', serif;
-  font-weight: bold;
-  color: #3e2f1c;
+
+/* ===========================
+   MOBILE TWEAKS (Media Query)
+   =========================== */
+@media (max-width: 768px) {
+  h2 {
+    font-size: 18px; /* Smaller title on phones */
+    margin: 5px 0;
+  }
+
+  button {
+    padding: 10px 15px; /* Smaller buttons to fit side-by-side */
+    font-size: 14px;
+    flex: 1 1 auto; /* Allow buttons to shrink/grow to fit row */
+  }
+
+  .button-container {
+    gap: 8px; /* Tighter gap */
+    width: 100%;
+  }
 }
