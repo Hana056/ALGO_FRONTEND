@@ -24,7 +24,7 @@ let nodes = [
   { id: "Jerusalem", x: 450, y: 460 }, 
   { id: "Tripoli",   x: 670, y: 1  }, 
   { id: "Damascus",  x: 640, y: 300 }, 
-  { id: "Homs",      x: 780, y: 80  }, 
+  { id: "Homs",      x: 790, y: 70  }, 
   { id: "Hamah",     x: 780, y: 440 }, 
   { id: "Aleppo",    x: 880, y: 260 }  
 ]
