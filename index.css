@@ -2,7 +2,7 @@
 body {
   margin: 0;
   height: 100vh;        /* Force body to be exactly screen height */
-  width: 100vw;         /* Force body to be exactly screen width */
+  width: 100%;         /* Force body to be exactly screen width */
   overflow: hidden;     /* Disable scrollbars */
   box-sizing: border-box; 
   
