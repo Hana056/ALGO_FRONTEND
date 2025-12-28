@@ -1,9 +1,9 @@
-/* Body with vintage parchment background */
+
 body {
   margin: 0;
-  height: 100vh;        /* Force body to be exactly screen height */
-  width: 100%;         /* Force body to be exactly screen width */
-  overflow: hidden;     /* Disable scrollbars */
+  height: 100vh;     
+  width: 100%;      
+  overflow: hidden;    
   box-sizing: border-box; 
   
   font-family: 'Garamond', 'Georgia', serif;
@@ -13,26 +13,24 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* Center content vertically */
-  padding: 10px; /* Reduced padding for mobile safety */
+  justify-content: center; 
+  padding: 10px; 
 }
 
-/* Heading */
+
 h2 {
   margin: 10px 0;
   text-align: center;
-  font-size: 24px; /* Default size */
+  font-size: 24px; 
 }
 
-/* Canvas styling */
+
 .canvas-container {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
   max-width: 900px; /* Stop it from getting too big on Desktop */
-  
-  /* Crucial for Mobile: Allow container to shrink */
   flex-shrink: 1; 
   min-height: 0; 
 }
@@ -42,24 +40,22 @@ h2 {
   background-color: #fff8e1;
   border-radius: 12px;
   box-shadow: 0 6px 15px rgba(0,0,0,0.25);
-
-  /* RESPONSIVE MAGIC */
-  width: 100%;          /* Fill the container width */
-  height: auto;         /* Scale height automatically to match aspect ratio */
-  aspect-ratio: 900/520; /* Keep the map shape correct */
-  object-fit: contain;  /* Ensure the map is never cropped */
+  width: 100%;          
+  height: auto;        
+  aspect-ratio: 900/520; 
+  object-fit: contain;  
 }
 
-/* Result text */
+
 #result {
   text-align: center; 
   font-weight: bold;
   margin: 10px 0;
   font-size: 18px;
-  min-height: 24px; /* Reserve space so layout doesn't jump */
+  min-height: 24px; 
 }
 
-/* Button container */
+
 .button-container {
   display: flex;
   gap: 12px;
@@ -73,7 +69,7 @@ button {
   background-color: #d2b48c;
   color: #3e2f1c;
   border: 2px solid #8b6d5c;
-  padding: 15px 30px; /* Slightly smaller default padding */
+  padding: 15px 30px; 
   font-size: 16px;
   cursor: pointer;
   border-radius: 6px;
@@ -99,22 +95,22 @@ button:nth-child(3) { background-color: #8b5e3c; }
 
 
 /* ===========================
-   MOBILE TWEAKS (Media Query)
+   MEDIA QUERY
    =========================== */
 @media (max-width: 768px) {
   h2 {
-    font-size: 18px; /* Smaller title on phones */
+    font-size: 18px; 
     margin: 5px 0;
   }
 
   button {
-    padding: 10px 15px; /* Smaller buttons to fit side-by-side */
+    padding: 10px 15px; 
     font-size: 14px;
-    flex: 1 1 auto; /* Allow buttons to shrink/grow to fit row */
+    flex: 1 1 auto; 
   }
 
   .button-container {
-    gap: 8px; /* Tighter gap */
+    gap: 8px; 
     width: 100%;
   }
 }

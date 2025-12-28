@@ -1,6 +1,21 @@
+// Get the canvas element from the HTML page (used to draw the graph)
 const canvas = document.getElementById("graphCanvas");
+
+// Get the 2D drawing context of the canvas (allows drawing shapes, lines, text)
 const ctx = canvas.getContext("2d");
+
+// Object that will store all data loaded from the backend (JSON output)
 let backendData = null;
+
+// Global animation ID used to control and cancel previous animations
+let animationId = 0;
+
+// Indicates which algorithm is currently active
+// "dijkstra"  → edge labels represent COST
+// "dinic"     → edge labels represent CAPACITY
+// "mcmf"      → edge labels represent COST | CAPACITY
+let currentMode = "dijkstra";
+
 
 // =======================
 // CONSTANTS
@@ -9,9 +24,6 @@ const NODE_RADIUS = 40;
 
 // =======================
 // DYNAMIC GRAPH DATA
-// =======================
-
-// VISUAL LAYOUT (Schematic View)
 // =======================
 
 let nodes = [
@@ -30,60 +42,49 @@ let nodes = [
 ]
 
 let edges = [
-  // 0: Cairo -> Damietta, Arish, Acre
-  { from: "Cairo",     to: "Damietta",  weight: 2 },
-  { from: "Cairo",     to: "Arish",     weight: 6 },
-  { from: "Cairo",     to: "Acre",      weight: 9 },
+  { from: "Cairo", to: "Damietta", cost: 2, capacity: 5 },
+  { from: "Cairo", to: "Arish", cost: 6, capacity: 6 },
+  { from: "Cairo", to: "Acre", cost: 9, capacity: 2 },
 
-  // 1: Damietta -> Arish, Gaza, Acre
-  { from: "Damietta",  to: "Arish",     weight: 6 },
-  { from: "Damietta",  to: "Gaza",      weight: 7 },
-  { from: "Damietta",  to: "Acre",      weight: 9 },
+  { from: "Damietta", to: "Arish", cost: 6, capacity: 4 },
+  { from: "Damietta", to: "Gaza", cost: 7, capacity: 3 },
+  { from: "Damietta", to: "Acre", cost: 9, capacity: 2 },
 
-  // 2: Arish -> Gaza, Jerusalem, Acre, Damascus
-  { from: "Arish",     to: "Gaza",      weight: 2 },
-  { from: "Arish",     to: "Jerusalem", weight: 6 },
-  { from: "Arish",     to: "Acre",      weight: 7 },
-  { from: "Arish",     to: "Damascus",  weight: 10 },
+  { from: "Arish", to: "Gaza", cost: 2, capacity: 6 },
+  { from: "Arish", to: "Jerusalem", cost: 6, capacity: 3 },
+  { from: "Arish", to: "Acre", cost: 7, capacity: 1 },
+  { from: "Arish", to: "Damascus", cost: 10, capacity: 1 },
 
-  // 3: Gaza -> Jerusalem, Acre
-  { from: "Gaza",      to: "Jerusalem", weight: 5 },
-  { from: "Gaza",      to: "Acre",      weight: 6 },
+  { from: "Gaza", to: "Jerusalem", cost: 5, capacity: 6 },
+  { from: "Gaza", to: "Acre", cost: 6, capacity: 3 },
 
-  // 4: Jerusalem -> Acre, Sidon, Damascus, Aleppo
-  { from: "Jerusalem", to: "Acre",      weight: 3 },
-  { from: "Jerusalem", to: "Sidon",     weight: 7 },
-  { from: "Jerusalem", to: "Damascus",  weight: 6 },
-  { from: "Jerusalem", to: "Aleppo",    weight: 12 },
+  { from: "Jerusalem", to: "Acre", cost: 3, capacity: 5 },
+  { from: "Jerusalem", to: "Sidon", cost: 7, capacity: 2 },
+  { from: "Jerusalem", to: "Damascus", cost: 6, capacity: 4 },
+  { from: "Jerusalem", to: "Aleppo", cost: 12, capacity: 2 },
 
-  // 5: Acre -> Sidon, Tripoli, Damascus
-  { from: "Acre",      to: "Sidon",     weight: 3 },
-  { from: "Acre",      to: "Tripoli",   weight: 4 },
-  { from: "Acre",      to: "Damascus",  weight: 8 },
+  { from: "Acre", to: "Sidon", cost: 3, capacity: 6 },
+  { from: "Acre", to: "Tripoli", cost: 4, capacity: 4 },
+  { from: "Acre", to: "Damascus", cost: 8, capacity: 1 },
 
-  // 6: Sidon -> Tripoli, Homs, Damascus
-  { from: "Sidon",     to: "Tripoli",   weight: 2 },
-  { from: "Sidon",     to: "Homs",      weight: 6 },
-  { from: "Sidon",     to: "Damascus",  weight: 7 },
+  { from: "Sidon", to: "Tripoli", cost: 2, capacity: 6 },
+  { from: "Sidon", to: "Homs", cost: 6, capacity: 2 },
+  { from: "Sidon", to: "Damascus", cost: 7, capacity: 2 },
 
-  // 7: Tripoli -> Homs, Hamah, Aleppo
-  { from: "Tripoli",   to: "Homs",      weight: 4 },
-  { from: "Tripoli",   to: "Hamah",     weight: 5 },
-  { from: "Tripoli",   to: "Aleppo",    weight: 6 },
+  { from: "Tripoli", to: "Homs", cost: 4, capacity: 5 },
+  { from: "Tripoli", to: "Hamah", cost: 5, capacity: 2 },
+  { from: "Tripoli", to: "Aleppo", cost: 6, capacity: 2 },
 
-  // 8: Homs -> Hamah, Damascus, Aleppo
-  { from: "Homs",      to: "Hamah",     weight: 2 },
-  { from: "Homs",      to: "Damascus",  weight: 4 },
-  { from: "Homs",      to: "Aleppo",    weight: 5 },
+  { from: "Homs", to: "Hamah", cost: 2, capacity: 6 },
+  { from: "Homs", to: "Damascus", cost: 4, capacity: 3 },
+  { from: "Homs", to: "Aleppo", cost: 5, capacity: 3 },
 
-  // 9: Hamah -> Damascus, Aleppo
-  { from: "Hamah",     to: "Damascus",  weight: 3 },
-  { from: "Hamah",     to: "Aleppo",    weight: 4 },
+  { from: "Hamah", to: "Damascus", cost: 3, capacity: 3 },
+  { from: "Hamah", to: "Aleppo", cost: 4, capacity: 6 },
 
-  // 10: Damascus -> Homs, Hamah, Aleppo
-  { from: "Damascus",  to: "Homs",      weight: 4 },
-  { from: "Damascus",  to: "Hamah",     weight: 3 },
-  { from: "Damascus",  to: "Aleppo",    weight: 2 }
+  { from: "Damascus", to: "Homs", cost: 4, capacity: 1 },
+  { from: "Damascus", to: "Hamah", cost: 3, capacity: 2 },
+  { from: "Damascus", to: "Aleppo", cost: 2, capacity: 5 }
 ];
 
 // =======================
@@ -178,11 +179,23 @@ function drawEdge(edge, color = "gray", width = 2) {
 
   drawArrow(fromNode, toNode, color, width);
 
+  let label = "";
+  if (currentMode === "dijkstra") {
+    label = edge.cost;
+  } 
+  else if (currentMode === "dinic") {
+    label = edge.capacity;
+  } 
+  else if (currentMode === "mcmf") {
+    label = `${edge.cost} | ${edge.capacity}`;
+  }
+
   const midX = (fromNode.x + toNode.x) / 2;
   const midY = (fromNode.y + toNode.y) / 2;
+
   ctx.fillStyle = "#000";
   ctx.font = "14px serif";
-  ctx.fillText(edge.weight, midX + 6, midY - 6);
+  ctx.fillText(label, midX + 6, midY - 6);
 }
 
 function centerGraph() {
@@ -249,7 +262,9 @@ function pathToEdges(path) {
 // =======================
 // ANIMATION
 // =======================
-function animatePath(path, color, callback = null, index = 0, drawnEdges = []) {
+function animatePath(path, color, callback = null, index = 0, drawnEdges = [], myId) {
+  if (myId !== animationId) return; // STOP old animation
+
   if (index >= path.length - 1) {
     if (callback) callback();
     return;
@@ -263,7 +278,7 @@ function animatePath(path, color, callback = null, index = 0, drawnEdges = []) {
   drawGraph(path.slice(0, index + 2), drawnEdges, color);
 
   setTimeout(() => {
-    animatePath(path, color, callback, index + 1, drawnEdges);
+    animatePath(path, color, callback, index + 1, drawnEdges, myId);
   }, 800);
 }
 
@@ -273,13 +288,17 @@ function animatePath(path, color, callback = null, index = 0, drawnEdges = []) {
 const shortestPath = ["Cairo", "Damascus", "Homs", "Aleppo"];
 
 function runDijkstraFromBackend() {
+  currentMode = "dijkstra";
   if (!backendData) return;
+
+  animationId++;            //  stop previous animation
+  const myId = animationId;
 
   const path = mapPath(backendData.dijkstra.path);
   const cost = backendData.dijkstra.cost;
 
-  drawGraph(); // reset canvas
-  animatePath(path, "green");
+  drawGraph();
+  animatePath(path, "green", null, 0, [], myId);
 
   document.getElementById("result").innerText =
     `Shortest path cost = ${cost}`;
@@ -290,7 +309,11 @@ function runDijkstraFromBackend() {
 // PHASE 2: CAPACITY (DINIC)
 // =======================
 function runDinicFromBackend() {
+  currentMode = "dinic";
   if (!backendData) return;
+
+  animationId++;
+  const myId = animationId;
 
   const paths = backendData.dinic.paths.map(p => mapPath(p));
   const maxFlow = backendData.dinic.max_flow;
@@ -301,21 +324,25 @@ function runDinicFromBackend() {
 
   let i = 0;
   function animateNext() {
-    if (i >= paths.length) return;
+    if (i >= paths.length || myId !== animationId) return;
     animatePath(paths[i], "blue", () => {
       i++;
       animateNext();
-    });
+    }, 0, [], myId);
   }
   animateNext();
 }
 
 
 // =======================
-// PHASE 3: SSP (FLOW DECOMPOSITION)
+// PHASE 3: SSP 
 // =======================
 function runSSPFromBackend() {
+  currentMode = "mcmf";
   if (!backendData) return;
+
+  animationId++;
+  const myId = animationId;
 
   const paths = backendData.mcmf.paths.map(p => mapPath(p.nodes));
   const totalCost = backendData.mcmf.total_cost;
@@ -326,11 +353,11 @@ function runSSPFromBackend() {
 
   let i = 0;
   function animateNext() {
-    if (i >= paths.length) return;
+    if (i >= paths.length || myId !== animationId) return;
     animatePath(paths[i], "red", () => {
       i++;
       animateNext();
-    });
+    }, 0, [], myId);
   }
   animateNext();
 }
