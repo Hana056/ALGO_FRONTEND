@@ -104,6 +104,7 @@ const nodeMap = {
   10: "Damascus",
   11: "Aleppo"
 };
+// Maps backend numeric node IDs to UI node names
 function mapPath(path) {
   return path.map(id => nodeMap[id]);
 }
@@ -121,6 +122,7 @@ function updateGraphData(newNodes, newEdges) {
 // =======================
 // DRAWING HELPERS
 // =======================
+// Draws a single node (circle + label), optionally highlighted
 function drawNode(x, y, label, highlight = false) {
   ctx.beginPath();
   ctx.arc(x, y, NODE_RADIUS, 0, Math.PI * 2);
@@ -136,6 +138,7 @@ function drawNode(x, y, label, highlight = false) {
   ctx.fillText(label, x, y + 5);
 }
 
+// Draws a directed arrow between two nodes
 function drawArrow(from, to, color, width) {
   const headLength = 14;
   const dx = to.x - from.x;
@@ -173,6 +176,7 @@ function drawArrow(from, to, color, width) {
   ctx.fill();
 }
 
+// Draws an edge with the correct label based on the active algorithm
 function drawEdge(edge, color = "gray", width = 2) {
   const fromNode = nodes.find(n => n.id === edge.from);
   const toNode = nodes.find(n => n.id === edge.to);
@@ -198,6 +202,7 @@ function drawEdge(edge, color = "gray", width = 2) {
   ctx.fillText(label, midX + 6, midY - 6);
 }
 
+// Shifts all nodes so the graph is centered on the canvas
 function centerGraph() {
   let minX = Infinity, minY = Infinity;
   let maxX = -Infinity, maxY = -Infinity;
@@ -263,7 +268,7 @@ function pathToEdges(path) {
 // ANIMATION
 // =======================
 function animatePath(path, color, callback = null, index = 0, drawnEdges = [], myId) {
-  if (myId !== animationId) return; // STOP old animation
+  if (myId !== animationId) return; // Stop old animation
 
   if (index >= path.length - 1) {
     if (callback) callback();
