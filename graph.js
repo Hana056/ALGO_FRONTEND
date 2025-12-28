@@ -87,6 +87,15 @@ let edges = [
   { from: "Damascus", to: "Aleppo", cost: 2, capacity: 5 }
 ];
 
+
+function loadGraphFromBackend(graph) {
+  nodes = graph.nodes;
+  edges = graph.edges;
+  centerGraph();
+  drawGraph();
+}
+
+
 // =======================
 // BACKEND NODE ID → UI NAME MAP
 // =======================
@@ -378,6 +387,7 @@ fetch("data.json")
   .then(res => res.json())
   .then(data => {
     backendData = data;
+    loadGraphFromBackend(data.graph);  
     console.log("Backend data loaded:", backendData);
   })
   .catch(err => console.error("Failed to load backend data", err));
